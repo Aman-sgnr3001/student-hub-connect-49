@@ -21,7 +21,7 @@ const StudentsPage = () => {
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = !selectedFilter || student.course === selectedFilter;
+    const matchesFilter = !selectedFilter || selectedFilter === "all" || student.course === selectedFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -65,7 +65,7 @@ const StudentsPage = () => {
                     <SelectValue placeholder="Filter by course" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Courses</SelectItem>
+                    <SelectItem value="all">All Courses</SelectItem>
                     <SelectItem value="Computer Science">Computer Science</SelectItem>
                     <SelectItem value="Mathematics">Mathematics</SelectItem>
                     <SelectItem value="Physics">Physics</SelectItem>
