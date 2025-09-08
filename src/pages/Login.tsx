@@ -8,12 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const Login = () => {
   const navigate = useNavigate();
-  const [userType, setUserType] = useState<string>("");
+  const [userType, setUserType] = useState<string | undefined>(undefined);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userType) {
+      alert("Please select a user type");
+      return;
+    }
     if (userType === "student") {
       navigate("/student/dashboard");
     } else if (userType === "admin") {

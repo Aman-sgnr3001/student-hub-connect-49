@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const Register = () => {
   const navigate = useNavigate();
-  const [userType, setUserType] = useState<string>("");
+  const [userType, setUserType] = useState<string | undefined>(undefined);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +16,10 @@ const Register = () => {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userType) {
+      alert("Please select a user type");
+      return;
+    }
     if (password !== confirmPassword) {
       alert("Passwords don't match!");
       return;
