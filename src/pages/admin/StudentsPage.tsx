@@ -28,16 +28,24 @@ const StudentsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate("/admin/dashboard")}
+              size="sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <h1 className="text-2xl font-bold text-primary">Students</h1>
+          </div>
           <Button 
-            variant="ghost" 
-            onClick={() => navigate("/admin/dashboard")}
-            size="sm"
+            onClick={() => navigate("/admin/academics")}
+            className="bg-primary hover:bg-primary/90"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            Academics
           </Button>
-          <h1 className="text-2xl font-bold text-primary">Students</h1>
         </div>
       </header>
 

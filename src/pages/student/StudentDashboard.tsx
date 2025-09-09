@@ -1,11 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, BookOpen, Target, Users, Plus, User } from "lucide-react";
+import { GraduationCap, BookOpen, Target, Users, Plus, User, LogOut, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useAcademics } from "@/contexts/AcademicsContext";
 
 const StudentDashboard = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { academicsSubmitted } = useAcademics();
+
   const handleViewProfile = () => {
     // Dummy functionality
     alert("View Profile - Feature coming soon!");
+  };
+
+  const handleLogout = () => {
+    // Remove student token and data from localStorage
+    localStorage.removeItem('studentToken');
+    localStorage.removeItem('studentData');
+    
+    // Show logout success message
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    
+    // Navigate to student login page
+    navigate("/student/login");
   };
 
   const handleAddAchievement = () => {
@@ -14,8 +36,12 @@ const StudentDashboard = () => {
   };
 
   const handleCardClick = (cardName: string) => {
-    // Dummy functionality
-    alert(`${cardName} - Feature coming soon!`);
+    if (cardName === "Academics") {
+      navigate("/student/academics");
+    } else {
+      // Dummy functionality for other cards
+      alert(`${cardName} - Feature coming soon!`);
+    }
   };
 
   return (
@@ -23,10 +49,16 @@ const StudentDashboard = () => {
       <header className="bg-card border-b border-border px-6 py-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-primary">Student Dashboard</h1>
-          <Button onClick={handleViewProfile} variant="outline" size="sm">
-            <User className="w-4 h-4 mr-2" />
-            View Profile
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleViewProfile} variant="outline" size="sm">
+              <User className="w-4 h-4 mr-2" />
+              View Profile
+            </Button>
+            <Button onClick={handleLogout} variant="destructive" size="sm">
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -67,13 +99,23 @@ const StudentDashboard = () => {
             onClick={() => handleCardClick("Academics")}
           >
             <CardHeader className="text-center">
-              <GraduationCap className="w-12 h-12 mx-auto text-primary mb-2" />
+              <div className="relative">
+                <GraduationCap className="w-12 h-12 mx-auto text-primary mb-2" />
+                {academicsSubmitted === 1 && (
+                  <CheckCircle className="w-5 h-5 absolute -top-1 -right-1 text-green-500 bg-white rounded-full" />
+                )}
+              </div>
               <CardTitle>Academics</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-center text-muted-foreground text-sm">
                 Course materials and academic resources
               </p>
+              {academicsSubmitted === 1 && (
+                <p className="text-center text-green-600 text-xs mt-2 font-medium">
+                  ✓ Records Updated
+                </p>
+              )}
             </CardContent>
           </Card>
 

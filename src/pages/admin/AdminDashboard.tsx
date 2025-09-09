@@ -1,9 +1,26 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, UserCheck } from "lucide-react";
+import { Users, FileText, UserCheck, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    // Remove admin token and faculty data from localStorage
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('facultyData');
+    
+    // Show logout success message
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    
+    // Navigate to admin login page
+    navigate("/admin/login");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,6 +48,13 @@ const AdminDashboard = () => {
             >
               <UserCheck className="w-4 h-4 mr-2" />
               Student Profiles
+            </Button>
+            <Button 
+              onClick={handleLogout}
+              variant="destructive"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>
