@@ -4,11 +4,14 @@ import { GraduationCap, BookOpen, Target, Users, Plus, User, LogOut, CheckCircle
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAcademics } from "@/contexts/AcademicsContext";
+import { useAchievements } from "@/hooks/useAchievements";
+import AchievementModal from "@/components/AchievementModal";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { academicsSubmitted } = useAcademics();
+  const { openAchievementModal, isModalOpen, closeAchievementModal } = useAchievements();
 
   const handleViewProfile = () => {
     // Dummy functionality
@@ -31,16 +34,26 @@ const StudentDashboard = () => {
   };
 
   const handleAddAchievement = () => {
-    // Dummy functionality
-    alert("Add Achievement - Feature coming soon!");
+    openAchievementModal();
   };
 
   const handleCardClick = (cardName: string) => {
-    if (cardName === "Academics") {
-      navigate("/student/academics");
-    } else {
-      // Dummy functionality for other cards
-      alert(`${cardName} - Feature coming soon!`);
+    switch (cardName) {
+      case "Academics":
+        navigate("/student/academics");
+        break;
+      case "Skills":
+        navigate("/student/skills");
+        break;
+      case "Curriculum":
+        navigate("/student/curricular");
+        break;
+      case "Extracurricular":
+        navigate("/student/extracurricular");
+        break;
+      default:
+        // Fallback for any other cards
+        alert(`${cardName} - Feature coming soon!`);
     }
   };
 
@@ -173,6 +186,12 @@ const StudentDashboard = () => {
           </Button>
         </div>
       </main>
+
+      {/* Achievement Modal */}
+      <AchievementModal 
+        isOpen={isModalOpen} 
+        onClose={closeAchievementModal} 
+      />
     </div>
   );
 };

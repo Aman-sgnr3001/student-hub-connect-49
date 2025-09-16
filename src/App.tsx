@@ -11,6 +11,9 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentAcademics from "./pages/student/StudentAcademics";
+import StudentSkills from "./pages/student/StudentSkills";
+import StudentCurricular from "./pages/student/StudentCurricular";
+import StudentExtracurricular from "./pages/student/StudentExtracurricular";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import StudentsPage from "./pages/admin/StudentsPage";
 import AcademicsPage from "./pages/admin/AcademicsPage";
@@ -35,6 +38,9 @@ const App = () => (
             <Route path="/student/register" element={<StudentRegister />} />
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/student/academics" element={<StudentAcademics />} />
+            <Route path="/student/skills" element={<StudentSkills />} />
+            <Route path="/student/curricular" element={<StudentCurricular />} />
+            <Route path="/student/extracurricular" element={<StudentExtracurricular />} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

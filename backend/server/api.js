@@ -262,6 +262,8 @@ const authenticateStudent = async (req, res, next) => {
 
 // Admin Registration Route
 app.post('/api/admin/register', async (req, res) => {
+    console.log('Admin registration route reached');
+    
     try {
         const { facultyname, facultyid, emailid, pass } = req.body;
 
@@ -533,6 +535,11 @@ app.post('/api/student/submit-document', authenticateStudent, upload.single('pdf
     try {
         const { key, ...documentData } = req.body;
         
+        console.log("Received submission request:");
+        console.log("Key:", key);
+        console.log("Document data:", documentData);
+        console.log("Student SID from token:", req.student.sid);
+        
         // Validate key parameter
         if (!key) {
             return res.status(400).json({ 
@@ -546,6 +553,7 @@ app.post('/api/student/submit-document', authenticateStudent, upload.single('pdf
         // Define schema mapping
         const schemaMap = {
             'curriculam': Activities,
+            'extracurriculam': Extracurriculam,
             'internship': Interned, 
             'placement': Company,
             'skill': Skill
@@ -553,9 +561,13 @@ app.post('/api/student/submit-document', authenticateStudent, upload.single('pdf
 
         // Validate key exists in mapping
         const DocumentModel = schemaMap[key];
+        console.log("Schema mapping result:", DocumentModel?.modelName || "NOT FOUND");
+        console.log("Available keys:", Object.keys(schemaMap));
+        
         if (!DocumentModel) {
+            console.log("ERROR: Invalid document key received:", key);
             return res.status(400).json({ 
-                error: 'Invalid document key. Allowed values: curriculam, internship, placement, skill' 
+                error: 'Invalid document key. Allowed values: curriculam, extracurriculam, internship, placement, skill' 
             });
         }
 
@@ -576,6 +588,16 @@ app.post('/api/student/submit-document', authenticateStudent, upload.single('pdf
                 if (!documentData.activities || !documentData.description) {
                     return res.status(400).json({ 
                         error: 'Missing required fields for curriculam: activities, description' 
+                    });
+                }
+                documentToSave.activities = documentData.activities;
+                documentToSave.description = documentData.description;
+                break;
+
+            case 'extracurriculam':
+                if (!documentData.activities || !documentData.description) {
+                    return res.status(400).json({ 
+                        error: 'Missing required fields for extracurriculam: activities, description' 
                     });
                 }
                 documentToSave.activities = documentData.activities;
@@ -753,8 +775,11 @@ app.get('/api/admin/pending-documents', authenticateAdmin, async (req, res) => {
 // Get All Internship Documents Route (Student Only)
 app.get('/api/student/internships', authenticateStudent, async (req, res) => {
     try {
-        // Fetch all internship documents from Interned schema
-        const internshipDocuments = await Interned.find({}).lean();
+        // Get student ID from JWT token
+        const studentSid = req.student.sid;
+
+        // Fetch all internship documents for this student from Interned schema
+        const internshipDocuments = await Interned.find({ sid: studentSid }).lean();
 
         // Transform URLs to full paths
         const documentsWithFullUrls = internshipDocuments.map(doc => ({
@@ -783,8 +808,11 @@ app.get('/api/student/internships', authenticateStudent, async (req, res) => {
 // Get All Extracurricular Documents Route (Student Only)
 app.get('/api/student/extracurricular', authenticateStudent, async (req, res) => {
     try {
-        // Fetch all extracurricular documents from Extracurriculam schema
-        const extracurricularDocuments = await Extracurriculam.find({}).lean();
+        // Get student ID from JWT token
+        const studentSid = req.student.sid;
+
+        // Fetch all extracurricular documents for this student from Extracurriculam schema
+        const extracurricularDocuments = await Extracurriculam.find({ sid: studentSid }).lean();
 
         // Transform URLs to full paths
         const documentsWithFullUrls = extracurricularDocuments.map(doc => ({
@@ -813,8 +841,11 @@ app.get('/api/student/extracurricular', authenticateStudent, async (req, res) =>
 // Get All Placement Documents Route (Student Only)
 app.get('/api/student/placements', authenticateStudent, async (req, res) => {
     try {
-        // Fetch all placement documents from Company schema
-        const placementDocuments = await Company.find({}).lean();
+        // Get student ID from JWT token
+        const studentSid = req.student.sid;
+
+        // Fetch all placement documents for this student from Company schema
+        const placementDocuments = await Company.find({ sid: studentSid }).lean();
 
         // Transform URLs to full paths
         const documentsWithFullUrls = placementDocuments.map(doc => ({
@@ -843,8 +874,11 @@ app.get('/api/student/placements', authenticateStudent, async (req, res) => {
 // Get All Skills Documents Route (Student Only)
 app.get('/api/student/skills', authenticateStudent, async (req, res) => {
     try {
-        // Fetch all skills documents from Skill schema
-        const skillsDocuments = await Skill.find({}).lean();
+        // Get student ID from JWT token
+        const studentSid = req.student.sid;
+
+        // Fetch all skills documents for this student from Skill schema
+        const skillsDocuments = await Skill.find({ sid: studentSid }).lean();
 
         // Transform URLs to full paths
         const documentsWithFullUrls = skillsDocuments.map(doc => ({
@@ -865,6 +899,39 @@ app.get('/api/student/skills', authenticateStudent, async (req, res) => {
         console.error('Get skills documents error:', error);
         res.status(500).json({ 
             error: 'Failed to retrieve skills documents',
+            details: error.message 
+        });
+    }
+});
+
+// Get All Curricular Documents Route (Student Only)
+app.get('/api/student/curricular', authenticateStudent, async (req, res) => {
+    try {
+        // Get student ID from JWT token
+        const studentSid = req.student.sid;
+
+        // Fetch all curricular documents for this student from Activities schema
+        const curricularDocuments = await Activities.find({ sid: studentSid }).lean();
+
+        // Transform URLs to full paths
+        const documentsWithFullUrls = curricularDocuments.map(doc => ({
+            ...doc,
+            url: doc.url ? `http://localhost:${process.env.PORT || 5000}${doc.url}` : null
+        }));
+
+        // Sort by creation date (most recent first)
+        documentsWithFullUrls.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+        res.status(200).json({
+            message: 'Curricular documents retrieved successfully',
+            totalCount: documentsWithFullUrls.length,
+            documents: documentsWithFullUrls
+        });
+
+    } catch (error) {
+        console.error('Get curricular documents error:', error);
+        res.status(500).json({ 
+            error: 'Failed to retrieve curricular documents',
             details: error.message 
         });
     }
@@ -897,6 +964,7 @@ app.listen(PORT, () => {
     console.log('- POST /api/student/submit-document (Student only - Submit documents by key)');
     console.log('- GET /api/student/internships (Student only - Get all internship documents)');
     console.log('- GET /api/student/extracurricular (Student only - Get all extracurricular documents)');
+    console.log('- GET /api/student/curricular (Student only - Get all curricular documents)');
     console.log('- GET /api/student/placements (Student only - Get all placement documents)');
     console.log('- GET /api/student/skills (Student only - Get all skills documents)');
     console.log('- GET /api/admin/pending-documents (Admin only - Get all pending documents)');
